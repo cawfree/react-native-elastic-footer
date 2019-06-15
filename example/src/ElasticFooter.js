@@ -243,7 +243,7 @@ ElasticFooter.defaultProps = {
     ),
   ],
   duration: 200,
-  debounce: 140,
+  debounce: 200,
   threshold: 0.94,
 };
 
