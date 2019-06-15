@@ -85,9 +85,9 @@ class ElasticFooter extends React.Component {
 
             const contentHeight = height - barHeight;
             const extendedHeight = contentHeight + maxHeight;
-            const maxScrollY = extendedHeight - layoutHeight;
+            const maxScrollY = contentHeight - layoutHeight;
 
-            const pct = y / maxScrollY;          
+            const pct = Math.min(extendedHeight / contentHeight, y / maxScrollY);
             const thr = (1 - maxScrollY / extendedHeight);
 
             if (pct >= thr) {

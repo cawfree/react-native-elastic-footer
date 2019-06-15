@@ -60,7 +60,7 @@ class App extends Component {
       .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
       .then(() => new Promise(resolve => this.setState({
         items: [
-          { key: 'Ugly Lemon', uri: 'https://images.pexels.com/photos/461337/pexels-photo-461337.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500' },
+          { key: Math.random(), uri: 'https://images.pexels.com/photos/461337/pexels-photo-461337.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500' },
           ...this.state.items,
         ],
         refreshing: false,
@@ -112,7 +112,7 @@ class App extends Component {
             }}
           >
             <ElasticFooter
-              maxHeight={120}
+              maxHeight={300}
               handleOnScroll={this.__handleOnScroll}
               refreshing={refreshing}
               onRefresh={this.__onRefresh}
