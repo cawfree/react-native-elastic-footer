@@ -64,9 +64,11 @@ class ElasticFooter extends React.Component {
   render() {
     const {
       maxHeight,
+      children,
     } = this.props;
     const {
       animValue,
+      refreshing,
     } = this.state;
     return (
       <Animated.View
@@ -79,6 +81,12 @@ class ElasticFooter extends React.Component {
           backgroundColor: 'blue',
         }}
       >
+        {children.map(Component => (
+          <Component
+            animValue={animValue}
+            refreshing={refreshing}
+          />
+        ))}
       </Animated.View>
     );
   }
@@ -87,11 +95,34 @@ class ElasticFooter extends React.Component {
 ElasticFooter.propTypes = {
   maxHeight: PropTypes.number,
   handleOnScroll: PropTypes.func,
+  refreshing: PropTypes.bool,
+  onRefresh: PropTypes.func,
+  children: PropTypes.arrayOf(
+    PropTypes.func,
+  ),
 };
 
 ElasticFooter.defaultProps = {
   maxHeight: 200,
   handleOnScroll: () => null,
+  refreshing: false,
+  onRefresh: () => null,
+  children: [
+    ({ animValue, refreshing }) => (
+      <Animated.View
+        style={{
+          flex: 1,
+          backgroundColor: animValue
+            .interpolate(
+              {
+                inputRange: [0, 1],
+                outputRange: ['green', 'red'],
+              },
+            ),
+        }}
+      />
+    ),
+  ],
 };
 
 export default ElasticFooter;

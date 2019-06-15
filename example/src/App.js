@@ -40,8 +40,10 @@ class App extends Component {
   constructor(nextProps) {
     super(nextProps);
     this.__handleOnScroll = this.__handleOnScroll.bind(this);
+    this.__onRefresh = this.__onRefresh.bind(this);
     this.state = {
       onScroll: null,
+      refreshing: false,
     };
   }
   __handleOnScroll(onScroll) {
@@ -51,8 +53,17 @@ class App extends Component {
       },
     );
   }
+  __onRefresh() {
+    return new Promise(resolve => this.setState({ refreshing: true }, resolve))
+      .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
+      .then(() => console.log('fini'))
+      .then(() => new Promise(resolve => this.setState({ refreshing: false }, resolve)));
+  }
   render() {
-    const { onScroll } = this.state;
+    const {
+      onScroll,
+      refreshing,
+    } = this.state;
     return (
       <View
         style={styles.container}
@@ -61,14 +72,13 @@ class App extends Component {
           onScroll={onScroll}
           overScrollMode="always"
           alwaysBounceVertical
-          scrollEventThrottle={1}
+          scrollEventThrottle={0.1}
           style={styles.scrollView}
         >
           {items.map(({ key, uri }) => (
             <Image
               key={key}
               style={styles.image}
-              resizeMode="fill"
               source={{ uri }}
             />
           ))}
@@ -80,6 +90,8 @@ class App extends Component {
           >
             <ElasticFooter
               handleOnScroll={this.__handleOnScroll}
+              refreshing={refreshing}
+              onRefresh={this.__onRefresh}
             />
           </View>
         </ScrollView>
