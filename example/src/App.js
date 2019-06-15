@@ -41,6 +41,7 @@ class App extends Component {
     super(nextProps);
     this.__handleOnScroll = this.__handleOnScroll.bind(this);
     this.__onRefresh = this.__onRefresh.bind(this);
+    this.__onRefreshComplete = this.__onRefreshComplete.bind(this);
     this.state = {
       onScroll: null,
       refreshing: false,
@@ -55,9 +56,21 @@ class App extends Component {
   }
   __onRefresh() {
     return new Promise(resolve => this.setState({ refreshing: true }, resolve))
-      .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
+      .then(() => new Promise(resolve => setTimeout(resolve, 400)))
       .then(() => console.log('fini'))
-      .then(() => new Promise(resolve => this.setState({ refreshing: false }, resolve)));
+      .then(() => new Promise(resolve => this.setState({ refreshing: false }, resolve)))
+      .then(this.__onRefreshComplete);
+  }
+  __onRefreshComplete() {
+    //const { scrollView } = this.refs;
+    //scrollView
+    //  .scrollTo(
+    //    {
+    //      x: 0,
+    //      y: 0,
+    //      animated: true,
+    //    },
+    //  );
   }
   render() {
     const {
@@ -69,6 +82,7 @@ class App extends Component {
         style={styles.container}
       >
         <ScrollView
+          ref="scrollView"
           onScroll={onScroll}
           overScrollMode="always"
           alwaysBounceVertical
