@@ -29,15 +29,6 @@ const styles = StyleSheet.create({
   },
 });
 
-const items = [
-  { key: 'Bruised Banana', uri: 'https://images.pexels.com/photos/1166648/pexels-photo-1166648.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500' },
-  { key: 'Lonely Apple', uri: 'https://images.pexels.com/photos/533343/pexels-photo-533343.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260' },
-  { key: 'Depressed Grapefruit', uri: 'https://images.pexels.com/photos/2247211/pexels-photo-2247211.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500' },
-  { key: 'Sweating Orange', uri: 'https://images.pexels.com/photos/67867/orange-falling-water-splash-67867.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260' },
-  { key: 'Abused Peach', uri: 'https://images.pexels.com/photos/784145/pexels-photo-784145.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260' },
-  { key: 'Ambiguous Melon', uri: 'https://images.pexels.com/photos/59970/background-food-fresh-fruit-59970.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260' },
-];
-
 class App extends Component {
   constructor(nextProps) {
     super(nextProps);
@@ -47,6 +38,14 @@ class App extends Component {
     this.state = {
       onScroll: null,
       refreshing: false,
+      items: [
+        { key: 'Bruised Banana', uri: 'https://images.pexels.com/photos/1166648/pexels-photo-1166648.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500' },
+        { key: 'Lonely Apple', uri: 'https://images.pexels.com/photos/533343/pexels-photo-533343.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260' },
+        { key: 'Depressed Grapefruit', uri: 'https://images.pexels.com/photos/2247211/pexels-photo-2247211.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500' },
+        { key: 'Sweating Orange', uri: 'https://images.pexels.com/photos/67867/orange-falling-water-splash-67867.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260' },
+        { key: 'Abused Peach', uri: 'https://images.pexels.com/photos/784145/pexels-photo-784145.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260' },
+        { key: 'Ambiguous Melon', uri: 'https://images.pexels.com/photos/59970/background-food-fresh-fruit-59970.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260' },
+      ],
     };
   }
   __handleOnScroll(onScroll) {
@@ -59,6 +58,13 @@ class App extends Component {
   __onRefresh() {
     return new Promise(resolve => this.setState({ refreshing: true }, resolve))
       .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
+      .then(() => new Promise(resolve => this.setState({
+        items: [
+          { key: 'Ugly Lemon', uri: 'https://images.pexels.com/photos/461337/pexels-photo-461337.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500' },
+          ...this.state.items,
+        ],
+        refreshing: false,
+      }, resolve)))
       .then(() => new Promise(resolve => this.setState({ refreshing: false }, resolve)))
       .then(this.__onRefreshComplete);
   }
@@ -77,6 +83,7 @@ class App extends Component {
     const {
       onScroll,
       refreshing,
+      items,
     } = this.state;
     return (
       <View
