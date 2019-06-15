@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import {
+  ActivityIndicator,
   StyleSheet,
   View,
   Platform,
   ScrollView,
+  Animated,
   Image,
 } from 'react-native';
 import ElasticFooter from './ElasticFooter';
@@ -97,15 +99,78 @@ class App extends Component {
           ))}
           <View
             style={{
-              width: 300,
+              width: 400,
               flexDirection: 'row',
             }}
           >
             <ElasticFooter
+              maxHeight={120}
               handleOnScroll={this.__handleOnScroll}
               refreshing={refreshing}
               onRefresh={this.__onRefresh}
-            />
+            >
+              {({ animValue, refreshing }) => (
+                <Animated.View
+                  style={{
+                    overflow: 'hidden',
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: animValue
+                      .interpolate(
+                        {
+                          inputRange: [0, 1],
+                          outputRange: ['#f2f4d1', '#58b368'],
+                        },
+                      ),
+                  }}
+                >
+                  <Animated.View
+                    style={{
+                      flex: 1,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Animated.View
+                      style={{
+                        width: 75,
+                        height: 75,
+                        marginRight: 15,
+                        paddingTop: Animated.multiply(
+                          Animated.add(-1, animValue),
+                          20,
+                        ),
+                      }}
+                    >
+                      <Animated.Image
+                        style={{
+                          width: 75,
+                          height: 75,
+                          marginRight: 15,
+                        }}
+                        source={{ uri: 'https://flaticons.net/gd/makefg.php?i=icons/Food/Fruit-Apple.png&r=255&g=255&b=255' }}
+                      />
+                      <Animated.View
+                        style={{
+                          position: 'absolute',
+                          opacity: refreshing ? animValue : 0.0,
+                          top: 0,
+                          left: 0,
+                          bottom: 0,
+                          right: 0,
+                          alignItems: 'center',
+                          paddingTop: 38,
+                        }}
+                      >
+                        <ActivityIndicator
+                        />
+                      </Animated.View>
+                    </Animated.View>
+                  </Animated.View>
+                </Animated.View>
+              )}
+            </ElasticFooter>
           </View>
         </ScrollView>
       </View>

@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  View,
   Animated,
   ActivityIndicator,
 } from 'react-native';
@@ -178,7 +179,7 @@ class ElasticFooter extends React.Component {
   render() {
     const {
       maxHeight,
-      children,
+      children: Child,
     } = this.props;
     const {
       animValue,
@@ -194,13 +195,10 @@ class ElasticFooter extends React.Component {
           ),
         }}
       >
-        {children.map((Component, i) => (
-          <Component
-            key={i}
-            animValue={animValue}
-            refreshing={refreshing}
-          />
-        ))}
+        <Child
+          animValue={animValue}
+          refreshing={refreshing}
+        />
       </Animated.View>
     );
   }
@@ -223,27 +221,22 @@ ElasticFooter.defaultProps = {
   handleOnScroll: () => null,
   refreshing: false,
   onRefresh: () => null,
-  children: [
-    ({ animValue, refreshing }) => (
-      <Animated.View
-        style={{
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: animValue
-            .interpolate(
-              {
-                inputRange: [0, 1],
-                outputRange: ['green', 'red'],
-              },
-            ),
-        }}
-      >
-      </Animated.View>
-    ),
-  ],
+  children: ({ animValue, refreshing }) => (
+    <Animated.View
+      style={{
+        flex: 1,
+        backgroundColor: animValue
+          .interpolate(
+            {
+              inputRange: [0, 1],
+              outputRange: ['green', 'red'],
+            },
+          ),
+      }}
+    />
+  ),
   duration: 200,
-  debounce: 200,
+  debounce: 150,
   threshold: 0.94,
 };
 
