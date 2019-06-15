@@ -29,6 +29,11 @@ class ElasticFooter extends React.Component {
       rate,
       { trailing: true },
     );
+    this.__onRequestCancel = debounce(
+      this.__onRequestCancel.bind(this),
+      rate,
+      { trailing: true },
+    );
   }
   __onRequestRefresh() {
     const { onRefresh } = this.props;
@@ -41,7 +46,13 @@ class ElasticFooter extends React.Component {
       },
     );
   }
-  
+  __onRequestCancel() {
+    this.setState(
+      {
+        cancelling: true,
+      },
+    );
+  }
   componentDidMount() {
     const {
       handleOnScroll,
@@ -58,8 +69,9 @@ class ElasticFooter extends React.Component {
           } = this.props;
           const {
             refreshing: isAlreadyRefreshing,
+            cancelling: isCancelling,
           } = this.state;
-          if (!isAlreadyRefreshing) {
+          if (!isAlreadyRefreshing && !isCancelling) {
             const {
               contentOffset: {
                 y,
@@ -95,6 +107,9 @@ class ElasticFooter extends React.Component {
   }
   __handleScrollWithinThreshold(currentDelta, totalDelta) {
     const {
+      threshold,
+    } = this.props;
+    const {
       animValue,
     } = this.state;
     const v = +(currentDelta / totalDelta).toFixed(2);
@@ -102,10 +117,12 @@ class ElasticFooter extends React.Component {
       .setValue(
         v,
       );
-    if (v >= 0.95) {
+    if (v >= threshold) {
       this.__onRequestRefresh.cancel();
+      this.__onRequestCancel.cancel();
       this.__onRequestRefresh();
     } else {
+      this.__onRequestCancel();
       this.__onRequestRefresh.cancel();
     }
   }
@@ -113,10 +130,12 @@ class ElasticFooter extends React.Component {
     const {
       refreshing,
       duration,
+      debounce: rate,
     } = nextProps;
     const {
       refreshing: isAlreadyRefreshing,
       animValue,
+      cancelling,
     } = nextState;
     if ((refreshing && !this.props.refreshing) && !isAlreadyRefreshing) {
       this.setState(
@@ -134,6 +153,26 @@ class ElasticFooter extends React.Component {
         },
       )
         .start();
+    } else if (cancelling && !this.state.cancelling) {
+      Animated.timing(
+        animValue,
+        {
+          toValue: 0,
+          duration,
+        },
+      )
+        .start(() => {
+          this.setTimeout(
+            () => {
+              this.setState(
+                {
+                  cancelling: false,
+                },
+              );
+            },
+            rate,
+          );
+        });
     }
   }
   render() {
@@ -153,7 +192,6 @@ class ElasticFooter extends React.Component {
             animValue,
             maxHeight,
           ),
-          backgroundColor: 'blue',
         }}
       >
         {children.map((Component, i) => (
@@ -177,6 +215,7 @@ ElasticFooter.propTypes = {
     PropTypes.func,
   ),
   duration: PropTypes.number,
+  threshold: PropTypes.number,
 };
 
 ElasticFooter.defaultProps = {
@@ -203,8 +242,14 @@ ElasticFooter.defaultProps = {
       </Animated.View>
     ),
   ],
-  duration: 300,
-  debounce: 120,
+  duration: 200,
+  debounce: 140,
+  threshold: 0.94,
 };
+
+Object.assign(
+  ElasticFooter.prototype,
+  require('react-timer-mixin'),
+);
 
 export default ElasticFooter;
