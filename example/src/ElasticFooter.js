@@ -1,21 +1,8 @@
 import React from 'react';
 import {
   Animated,
-  View,
-  StyleSheet,
-  // TODO: remove this
-  Dimensions,
 } from 'react-native';
 import PropTypes from 'prop-types';
-
-const styles = StyleSheet.create(
-  {
-    container: {
-      flex: 1,
-      backgroundColor: 'green',
-    },
-  },
-);
 
 // TODO: Support direction.
 class ElasticFooter extends React.Component {
@@ -29,26 +16,21 @@ class ElasticFooter extends React.Component {
     const {
       handleOnScroll,
       maxHeight,
-      ...extraProps
     } = this.props;
     const {
       animValue,
-      ...extraState
     } = this.state;
     if (handleOnScroll) {
       handleOnScroll(
         (e) => {
           const {
             contentOffset: {
-              x,
               y,
             },
             contentSize: {
-              width,
               height,
             },
             layoutMeasurement: {
-              width: layoutWidth,
               height: layoutHeight,
             },
           } = e.nativeEvent;
@@ -82,11 +64,9 @@ class ElasticFooter extends React.Component {
   render() {
     const {
       maxHeight,
-      ...nextProps
     } = this.props;
     const {
       animValue,
-      ...nextState
     } = this.state;
     return (
       <Animated.View
