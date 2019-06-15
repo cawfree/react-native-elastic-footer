@@ -10,6 +10,10 @@ import { debounce } from 'lodash';
 class ElasticFooter extends React.Component {
   constructor(nextProps) {
     super(nextProps);
+    const {
+      duration,
+      debounce: rate,
+    } = nextProps;
     this.state = {
       animValue: new Animated.Value(0),
       refreshing: false,
@@ -17,9 +21,18 @@ class ElasticFooter extends React.Component {
     };
     this.__onRefreshComplete = debounce(
       this.__onRefreshComplete.bind(this),
-      250,
+      rate,
       { trailing: true },
     );
+    this.__onRequestRefresh = debounce(
+      this.__onRequestRefresh.bind(this),
+      rate,
+      { trailing: true },
+    );
+  }
+  __onRequestRefresh() {
+    const { onRefresh } = this.props;
+    onRefresh();
   }
   __onRefreshComplete() {
     this.setState(
@@ -82,9 +95,6 @@ class ElasticFooter extends React.Component {
   }
   __handleScrollWithinThreshold(currentDelta, totalDelta) {
     const {
-      onRefresh,
-    } = this.props;
-    const {
       animValue,
     } = this.state;
     const v = +(currentDelta / totalDelta).toFixed(2);
@@ -93,12 +103,16 @@ class ElasticFooter extends React.Component {
         v,
       );
     if (v >= 0.95) {
-      onRefresh();
+      this.__onRequestRefresh.cancel();
+      this.__onRequestRefresh();
+    } else {
+      this.__onRequestRefresh.cancel();
     }
   }
   componentWillUpdate(nextProps, nextState) {
     const {
       refreshing,
+      duration,
     } = nextProps;
     const {
       refreshing: isAlreadyRefreshing,
@@ -116,8 +130,7 @@ class ElasticFooter extends React.Component {
         animValue,
         {
           toValue: 0,
-          // TODO: as props
-          duration: 300,
+          duration,
         },
       )
         .start();
@@ -163,6 +176,7 @@ ElasticFooter.propTypes = {
   children: PropTypes.arrayOf(
     PropTypes.func,
   ),
+  duration: PropTypes.number,
 };
 
 ElasticFooter.defaultProps = {
@@ -189,6 +203,8 @@ ElasticFooter.defaultProps = {
       </Animated.View>
     ),
   ],
+  duration: 300,
+  debounce: 120,
 };
 
 export default ElasticFooter;
