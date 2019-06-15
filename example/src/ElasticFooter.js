@@ -1,8 +1,6 @@
 import React from 'react';
 import {
-  View,
   Animated,
-  ActivityIndicator,
 } from 'react-native';
 import PropTypes from 'prop-types';
 import { debounce } from 'lodash';
@@ -12,7 +10,6 @@ class ElasticFooter extends React.Component {
   constructor(nextProps) {
     super(nextProps);
     const {
-      duration,
       debounce: rate,
     } = nextProps;
     this.state = {
@@ -209,9 +206,7 @@ ElasticFooter.propTypes = {
   handleOnScroll: PropTypes.func,
   refreshing: PropTypes.bool,
   onRefresh: PropTypes.func,
-  children: PropTypes.arrayOf(
-    PropTypes.func,
-  ),
+  children: PropTypes.func,
   duration: PropTypes.number,
   threshold: PropTypes.number,
 };

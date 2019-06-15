@@ -84,6 +84,7 @@ class App extends Component {
       >
         <ScrollView
           ref="scrollView"
+          pointerEvents={refreshing ? 'none' : 'auto'}
           onScroll={onScroll}
           overScrollMode="always"
           alwaysBounceVertical
