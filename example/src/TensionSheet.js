@@ -30,7 +30,6 @@ class TensionSheet extends React.Component {
   }
   __onLayout(e) { /* android hack */ }
   __onCancel() {
-    console.log('should cancel');
     this.setState(
       {
         cancelling: true,
@@ -38,7 +37,6 @@ class TensionSheet extends React.Component {
     );
   }
   __onRefresh() {
-    console.log('should refresh');
     const { onRefresh } = this.props;
     onRefresh();
   }
@@ -134,7 +132,6 @@ class TensionSheet extends React.Component {
                 (((y - scrollLimit) + 1) * incr) * 1.2,
               );
               animValue.setValue(v);
-              console.log(v);
               if (v === 1) {
                 this.__onCancel.cancel();
                 this.__onRefresh();
@@ -155,9 +152,11 @@ class TensionSheet extends React.Component {
   render() {
     const {
       maxHeight,
+      children: Child,
     } = this.props;
     const {
       animValue,
+      refreshing,
     } = this.state;
     return (
       <Animated.View
@@ -167,14 +166,18 @@ class TensionSheet extends React.Component {
         renderToHardwareTextureAndroid
         onLayout={this.__onLayout}
         style={{
-          width: 100,
           height: Animated.multiply(
             animValue,
             maxHeight,
           ),
+          flexDirection: 'row',
           backgroundColor: 'orange',
         }}
       >
+        <Child
+          animValue={animValue}
+          refreshing={refreshing}
+        />
       </Animated.View>
     );
   }
@@ -187,6 +190,7 @@ TensionSheet.propTypes = {
   onRefresh: PropTypes.func,
   duration: PropTypes.number,
   debounce: PropTypes.number,
+  children: PropTypes.func,
 };
 
 TensionSheet.defaultProps = {
@@ -196,6 +200,20 @@ TensionSheet.defaultProps = {
   onRefresh: () => null,
   duration: 300,
   debounce: 120,
+  children: ({ animValue, refreshing }) => (
+    <Animated.View
+      style={{
+        flex: 1,
+        backgroundColor: animValue
+          .interpolate(
+            {
+              inputRange: [0, 1],
+              outputRange: ['green', 'red'],
+            },
+          ),
+      }}
+    />
+  ),
 };
 
 Object.assign(
