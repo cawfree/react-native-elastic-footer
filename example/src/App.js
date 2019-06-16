@@ -5,14 +5,48 @@ import {
   ScrollView,
   Platform,
   View,
+  StyleSheet,
 } from 'react-native';
 
-import TensionSheet from './TensionSheet';
+import ElasticFooter from './ElasticFooter';
+
+const styles = StyleSheet.create(
+  {
+    container: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      bottom: 0,
+      right: 0,
+    },
+    scrollView: {
+      flexDirection: 'row',
+    },
+    image: {
+      width: 500,
+      height: 500,
+    },
+    footer: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      bottom: 0,
+      right: 0,
+      overflow: 'hidden',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    icon: {
+      width: 70,
+      height: 70,
+    },
+  },
+);
 
 class App extends React.Component {
   constructor(nextProps) {
     super(nextProps);
-    this.__onOnScroll = this.__onOnScroll.bind(this);
+    this.__onHandleMixins = this.__onHandleMixins.bind(this);
     this.__onRefresh = this.__onRefresh.bind(this);
     this.__onCancel = this.__onCancel.bind(this);
     this.state = {
@@ -26,7 +60,7 @@ class App extends React.Component {
       ],
     };
   }
-  __onOnScroll(onScroll) {
+  __onHandleMixins(onScroll) {
     this.setState(
       {
         onScroll,
@@ -41,7 +75,7 @@ class App extends React.Component {
     );
   }
   __onRefresh() {
-    // XXX: You can just leave the TensionSheet open...
+    // XXX: You can just leave the ElasticFooter open...
     return new Promise(resolve => this.setState({ refreshing: true }, resolve))
       // XXX: Or you can fetch data and programmatically close it once you're done.
       .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
@@ -71,73 +105,58 @@ class App extends React.Component {
     } = this.state;
     return (
       <View
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          bottom: 0,
-          right: 0,
-        }}
+        style={styles.container}
       >
         <ScrollView
           ref="scrollView"
           onScroll={onScroll}
-          style={{
-            flexDirection: 'row',
-          }}
+          style={styles.scrollView}
           scrollEventThrottle={0.1}
         >
           {items.map(({ key }) => (
             <Image
               key={key}
-              style={{
-                width: 500,
-                height: 500,
-              }}
+              style={styles.image}
               source={{ uri: key }}
             />
           ))}
-          <TensionSheet
+          <ElasticFooter
             maxHeight={150}
-            onOnScroll={this.__onOnScroll}
+            onHandleMixins={this.__onHandleMixins}
             onRefresh={this.__onRefresh}
             onCancel={this.__onCancel}
             refreshing={refreshing}
           >
             {({ animValue, refreshing }) => (
               <Animated.View
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  bottom: 0,
-                  right: 0,
-                  overflow: 'hidden',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: animValue
-                    .interpolate(
-                      {
-                        inputRange: [0, 1],
-                        outputRange: ['#005542', '#a1dd70'],
-                      },
-                    ),
-                }}
+                style={[
+                  styles.footer,
+                  {
+                    backgroundColor: animValue
+                      .interpolate(
+                        {
+                          inputRange: [0, 1],
+                          outputRange: ['#005542', '#a1dd70'],
+                        },
+                      ),
+                  },
+                ]}
               >
                 <Animated.Image
-                  style={{
-                    opacity: Animated.add(0.5, animValue),
-                    width: 70,
-                    height: 70,
-                    transform: [
-                      { scale: Animated.add(1, animValue) },
-                    ],
-                  }}
+                  style={[
+                    styles.icon,
+                    {
+                      opacity: Animated.add(0.5, animValue),
+                      transform: [
+                        { scale: Animated.add(1, animValue) },
+                      ],
+                    },
+                  ]}
                   source={{ uri: 'https://applehospitalityreit.com/wp-content/uploads/2018/10/apple-white.png' }}
                 />
               </Animated.View>
             )}
-          </TensionSheet>
+          </ElasticFooter>
         </ScrollView>
       </View>
     );

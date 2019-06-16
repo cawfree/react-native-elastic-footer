@@ -5,186 +5,156 @@ import {
 import PropTypes from 'prop-types';
 import { debounce } from 'lodash';
 
-// TODO: Support direction.
 class ElasticFooter extends React.Component {
   constructor(nextProps) {
     super(nextProps);
     const {
+      refreshing,
       debounce: rate,
     } = nextProps;
+    this.__onLayout = this.__onLayout.bind(this);
     this.state = {
-      animValue: new Animated.Value(0),
-      refreshing: false,
+      animValue: new Animated.Value(refreshing ? 1 : 0),
       cancelling: false,
+      refreshing: false,
     };
-    this.__onRefreshComplete = debounce(
-      this.__onRefreshComplete.bind(this),
+    this.__onCancel = debounce(
+      this.__onCancel.bind(this),
       rate,
       { trailing: true },
     );
-    this.__onRequestRefresh = debounce(
-      this.__onRequestRefresh.bind(this),
-      rate,
-      { trailing: true },
-    );
-    this.__onRequestCancel = debounce(
-      this.__onRequestCancel.bind(this),
+    this.__onRefresh = debounce(
+      this.__onRefresh.bind(this),
       rate,
       { trailing: true },
     );
   }
-  __onRequestRefresh() {
-    const { onRefresh } = this.props;
-    onRefresh();
-  }
-  __onRefreshComplete() {
+  __onLayout(e) { /* android hack */ }
+  __onCancel() {
+    const { onCancel } = this.props;
     this.setState(
       {
         refreshing: false,
-      },
-    );
-  }
-  __onRequestCancel() {
-    this.setState(
-      {
         cancelling: true,
       },
+      onCancel,
     );
   }
-  componentDidMount() {
-    const {
-      handleOnScroll,
-      maxHeight,
-    } = this.props;
-    const {
-      animValue,
-    } = this.state;
-    if (handleOnScroll) {
-      handleOnScroll(
-        (e) => {
-          const {
-            refreshing,
-          } = this.props;
-          const {
-            refreshing: isAlreadyRefreshing,
-            cancelling: isCancelling,
-          } = this.state;
-          if (!isAlreadyRefreshing && !isCancelling) {
-            const {
-              contentOffset: {
-                y,
-              },
-              contentSize: {
-                height,
-              },
-              layoutMeasurement: {
-                height: layoutHeight,
-              },
-            } = e.nativeEvent;
-            const barHeight = animValue.__getValue() * maxHeight;
-
-            const contentHeight = height - barHeight;
-            const extendedHeight = contentHeight + maxHeight;
-            const maxScrollY = contentHeight - layoutHeight;
-
-            const pct = Math.min(extendedHeight / contentHeight, y / maxScrollY);
-            const thr = (1 - maxScrollY / extendedHeight);
-
-            if (pct >= thr) {
-              this.__handleScrollWithinThreshold(
-                pct - thr,
-                1 - thr,
-              );
-            }
-          } else if (!refreshing) {
-            this.__onRefreshComplete();
-          }
-        },
-     );
-    }
+  __onRefresh() {
+    const { onRefresh } = this.props;
+    onRefresh();
   }
-  __handleScrollWithinThreshold(currentDelta, totalDelta) {
+  __depress() {
     const {
-      threshold,
+      duration,
+      debounce: rate,
     } = this.props;
     const {
       animValue,
     } = this.state;
-    const v = +(currentDelta / totalDelta).toFixed(2);
-    animValue
-      .setValue(
-        v,
+    Animated.timing(
+      animValue,
+      {
+        toValue: 0,
+        // TODO: fn of distance
+        duration,
+      },
+    )
+      .start(
+        () => {
+          this.setTimeout(
+            () => this.setState(
+              {
+                cancelling: false,
+                refreshing: false,
+              },
+            ),
+            rate,
+          );
+        },
       );
-    if (v >= threshold) {
-      this.__onRequestRefresh.cancel();
-      this.__onRequestCancel.cancel();
-      this.__onRequestRefresh();
-    } else {
-      this.__onRequestCancel();
-      this.__onRequestRefresh.cancel();
-    }
   }
   componentWillUpdate(nextProps, nextState) {
     const {
-      refreshing,
       duration,
       debounce: rate,
+      refreshing,
     } = nextProps;
     const {
-      refreshing: isAlreadyRefreshing,
       animValue,
-      cancelling,
+      cancelling: isCancelling,
+      refreshing: isRefreshing,
     } = nextState;
-    if ((refreshing && !this.props.refreshing) && !isAlreadyRefreshing) {
+    if (isCancelling && !this.state.cancelling) {
+      this.__depress();
+    } else if ((refreshing && !this.props.refreshing) && !isRefreshing) {
       this.setState(
         {
-          refreshing,
+          refreshing: true,
         },
       );
+    } else if ((!refreshing && this.props.refreshing) && isRefreshing) {
+      this.__depress();
     }
-    if ((!refreshing && this.props.refreshing) && isAlreadyRefreshing) {
-      Animated.timing(
-        animValue,
-        {
-          toValue: 0,
-          duration,
+  }
+  componentDidMount() {
+    const {
+      onHandleMixins,
+      maxHeight,
+      onRefresh,
+    } = this.props;
+    // XXX: This is hacky. Come up with a smoother implementation function.
+    const incr = (1 / maxHeight) * 1;
+    const { footer } = this.refs;
+    onHandleMixins((e) => {
+      const {
+        cancelling: isCancelling,
+        refreshing: isRefreshing,
+      } = this.state;
+      const {
+        contentOffset: {
+          y,
         },
-      )
-        .start(
-          () => {
-            this.setTimeout(
-              () => {
-                this.setState(
-                  {
-                    refreshing: false,
-                  },
-                ),
-              },
-              rate,
-            );
-          },
-        );
-    } else if (cancelling && !this.state.cancelling) {
-      Animated.timing(
-        animValue,
-        {
-          toValue: 0,
-          duration,
+        contentSize: {
+          height: totalContentHeight,
         },
-      )
-        .start(() => {
-          this.setTimeout(
-            () => {
-              this.setState(
-                {
-                  cancelling: false,
-                },
-              );
-            },
-            rate,
+        layoutMeasurement: {
+          height: layoutHeight,
+        },
+      } = e.nativeEvent;
+      footer._component.measure(
+        (ox, oy, width, height, px, py) => {
+          const { animValue } = this.state;
+          const barHeight = animValue.__getValue() * maxHeight;
+          const contentHeight = totalContentHeight - barHeight;
+          const scrollLimit = contentHeight - layoutHeight;
+          const v = Math.min(
+            1,
+            // TODO: need to scale coefficient properly
+            (((y - scrollLimit) + 1) * incr) * 1.2,
           );
-        });
-    }
+          if (!isCancelling && !isRefreshing) {
+            if (y >= scrollLimit - 1) {
+              animValue.setValue(v);
+              if (v === 1) {
+                this.__onCancel.cancel();
+                this.__onRefresh();
+              } else {
+                this.__onRefresh.cancel();
+                this.__onCancel();
+              }
+            } else {
+              this.__onRefresh.cancel();
+              this.__onCancel.cancel();
+              animValue.setValue(0);
+            }
+          } else if (isRefreshing && v <= 0) {
+            this.__onCancel()
+            this.__onCancel.flush();
+          }
+        },
+      );
+    });
   }
   render() {
     const {
@@ -197,12 +167,18 @@ class ElasticFooter extends React.Component {
     } = this.state;
     return (
       <Animated.View
+        ref="footer"
+        removeClippedSubviews={false}
+        collapsable={false}
+        renderToHardwareTextureAndroid
+        onLayout={this.__onLayout}
         style={{
-          flex: 1,
           height: Animated.multiply(
             animValue,
             maxHeight,
           ),
+          flexDirection: 'row',
+          backgroundColor: 'orange',
         }}
       >
         <Child
@@ -215,20 +191,24 @@ class ElasticFooter extends React.Component {
 }
 
 ElasticFooter.propTypes = {
+  onHandleMixins: PropTypes.func,
   maxHeight: PropTypes.number,
-  handleOnScroll: PropTypes.func,
   refreshing: PropTypes.bool,
   onRefresh: PropTypes.func,
-  children: PropTypes.func,
+  onCancel: PropTypes.func,
   duration: PropTypes.number,
-  threshold: PropTypes.number,
+  debounce: PropTypes.number,
+  children: PropTypes.func,
 };
 
 ElasticFooter.defaultProps = {
+  onHandleMixins: onScroll => null,
   maxHeight: 100,
-  handleOnScroll: () => null,
   refreshing: false,
   onRefresh: () => null,
+  onCancel: () => null,
+  duration: 300,
+  debounce: 120,
   children: ({ animValue, refreshing }) => (
     <Animated.View
       style={{
@@ -243,9 +223,6 @@ ElasticFooter.defaultProps = {
       }}
     />
   ),
-  duration: 150,
-  debounce: 130,
-  threshold: 0.94,
 };
 
 Object.assign(
