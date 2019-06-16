@@ -34,7 +34,7 @@ import {
   StyleSheet,
 } from 'react-native';
 
-import ElasticFooter from './ElasticFooter';
+import ElasticFooter from '@cawfree/react-native-elastic-footer';
 
 const styles = StyleSheet.create(
   {
