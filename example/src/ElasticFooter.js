@@ -30,19 +30,19 @@ class ElasticFooter extends React.Component {
     );
   }
   __onLayout(e) { /* android hack */ }
-  __onCancel() {
+  __onCancel(contentHeight) {
     const { onCancel } = this.props;
     this.setState(
       {
         refreshing: false,
         cancelling: true,
       },
-      onCancel,
+      () => onCancel(contentHeight),
     );
   }
-  __onRefresh() {
+  __onRefresh(contentHeight) {
     const { onRefresh } = this.props;
-    onRefresh();
+    onRefresh(contentHeight);
   }
   __depress() {
     const {
@@ -138,18 +138,18 @@ class ElasticFooter extends React.Component {
               animValue.setValue(v);
               if (v === 1) {
                 this.__onCancel.cancel();
-                this.__onRefresh();
+                this.__onRefresh(scrollLimit);
               } else {
                 this.__onRefresh.cancel();
-                this.__onCancel();
+                this.__onCancel(scrollLimit);
               }
             } else {
               this.__onRefresh.cancel();
               this.__onCancel.cancel();
               animValue.setValue(0);
             }
-          } else if (isRefreshing && v <= 0) {
-            this.__onCancel()
+          } else if (isRefreshing && v === 0) {
+            this.__onCancel(scrollLimit)
             this.__onCancel.flush();
           }
         },
@@ -205,8 +205,8 @@ ElasticFooter.defaultProps = {
   onHandleMixins: onScroll => null,
   maxHeight: 100,
   refreshing: false,
-  onRefresh: () => null,
-  onCancel: () => null,
+  onRefresh: contentHeight => null,
+  onCancel: contentHeight => null,
   duration: 300,
   debounce: 120,
   children: ({ animValue, refreshing }) => (

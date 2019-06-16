@@ -18,13 +18,14 @@ const styles = StyleSheet.create(
       left: 0,
       bottom: 0,
       right: 0,
+      backgroundColor: 'black',
     },
     scrollView: {
       flexDirection: 'row',
     },
     image: {
-      width: 500,
-      height: 500,
+      width: 300,
+      height: 350,
     },
     footer: {
       position: 'absolute',
@@ -53,12 +54,31 @@ class App extends React.Component {
       onScroll: null,
       refreshing: false,
       items: [
-        { key: 'https://images.pexels.com/photos/206959/pexels-photo-206959.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260'},
-        { key: 'https://images.pexels.com/photos/1002543/pexels-photo-1002543.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260' },
-        { key: 'https://images.pexels.com/photos/1824354/pexels-photo-1824354.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260' },
-        { key: 'https://images.pexels.com/photos/1260296/pexels-photo-1260296.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260' },
+        { key: 'https://magic.wizards.com/sites/mtg/files/images/card/en_5eDl5u25Hzm.png' },
+        { key: 'https://magic.wizards.com/sites/mtg/files/images/card/en_WUdaayMnfL.png' },
+        { key: 'https://magic.wizards.com/sites/mtg/files/images/card/QRay1SEQ9e.png' },
+        { key: 'https://magic.wizards.com/sites/mtg/files/images/card/Tz0PAj1LTD_0.png' },
       ],
+      animRotate: new Animated.Value(0),
     };
+  }
+  componentWillUpdate(nextProps, nextState) {
+    const {
+      refreshing,
+      animRotate,
+    } = nextState;
+    if (refreshing && !this.state.refreshing) {
+      animRotate.setValue(0);
+      Animated.timing(
+        animRotate,
+        {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        },
+      )
+        .start(() => console.log('fin'));
+    }
   }
   __onHandleMixins(onScroll) {
     this.setState(
@@ -67,21 +87,30 @@ class App extends React.Component {
       },
     );
   }
-  __onCancel() {
+  __onCancel(contentHeight) {
+    const { scrollView } = this.refs;
+    scrollView
+      .scrollTo(
+        {
+          x: 0,
+          y: contentHeight - 10,
+          animated: true,
+        },
+      );
     this.setState(
       {
         refreshing: false,
       },
     );
   }
-  __onRefresh() {
+  __onRefresh(contentHeight) {
     // XXX: You can just leave the ElasticFooter open...
     return new Promise(resolve => this.setState({ refreshing: true }, resolve))
       // XXX: Or you can fetch data and programmatically close it once you're done.
       .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
       .then(() => new Promise(resolve => this.setState({
         items: [
-          { key: 'https://images.pexels.com/photos/37547/suit-business-man-business-man-37547.jpeg?auto=format%2Ccompress&cs=tinysrgb&h=750&w=1260' },
+          { key: 'https://media.wizards.com/2018/images/magic/GRN/callout/en_Z6I4dSYzkH.png' },
           ...this.state.items,
         ],
         refreshing: false,
@@ -102,6 +131,7 @@ class App extends React.Component {
       onScroll,
       refreshing,
       items,
+      animRotate,
     } = this.state;
     return (
       <View
@@ -121,7 +151,7 @@ class App extends React.Component {
             />
           ))}
           <ElasticFooter
-            maxHeight={150}
+            maxHeight={120}
             onHandleMixins={this.__onHandleMixins}
             onRefresh={this.__onRefresh}
             onCancel={this.__onCancel}
@@ -132,13 +162,7 @@ class App extends React.Component {
                 style={[
                   styles.footer,
                   {
-                    backgroundColor: animValue
-                      .interpolate(
-                        {
-                          inputRange: [0, 1],
-                          outputRange: ['#005542', '#a1dd70'],
-                        },
-                      ),
+                    backgroundColor: '#000000',
                   },
                 ]}
               >
@@ -148,11 +172,18 @@ class App extends React.Component {
                     {
                       opacity: Animated.add(0.5, animValue),
                       transform: [
-                        { scale: Animated.add(1, animValue) },
+                        {
+                          rotate: animRotate.interpolate(
+                            {
+                              inputRange: [0, 1],
+                              outputRange: ['0deg', '360deg'],
+                            },
+                          ),
+                        },
                       ],
                     },
                   ]}
-                  source={{ uri: 'https://applehospitalityreit.com/wp-content/uploads/2018/10/apple-white.png' }}
+                  source={{ uri: 'https://flaticons.net/gd/makefg.php?i=icons/Miscellaneous/Sword-03.png&r=255&g=255&b=255' }}
                 />
               </Animated.View>
             )}
