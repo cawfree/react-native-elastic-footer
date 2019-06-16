@@ -177,7 +177,6 @@ class ElasticFooter extends React.Component {
             animValue,
             maxHeight,
           ),
-          flexDirection: 'row',
           backgroundColor: 'orange',
         }}
       >

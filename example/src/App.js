@@ -6,9 +6,13 @@ import {
   Platform,
   View,
   StyleSheet,
+  Dimensions,
 } from 'react-native';
 
 import ElasticFooter from './ElasticFooter';
+
+const cardHeight = Platform.OS === 'web' ? 350 : 200;
+const cardWidth = 0.85 * cardHeight;
 
 const styles = StyleSheet.create(
   {
@@ -19,13 +23,15 @@ const styles = StyleSheet.create(
       bottom: 0,
       right: 0,
       backgroundColor: 'black',
+      flex: 1,
     },
     scrollView: {
-      flexDirection: 'row',
+      flexDirection: 'column',
+      width: cardWidth,
     },
     image: {
-      width: 300,
-      height: 350,
+      width: cardWidth,
+      height: cardHeight,
     },
     footer: {
       position: 'absolute',
@@ -74,10 +80,9 @@ class App extends React.Component {
         {
           toValue: 1,
           duration: 1000,
-          useNativeDriver: true,
         },
       )
-        .start(() => console.log('fin'));
+        .start();
     }
   }
   __onHandleMixins(onScroll) {
@@ -156,6 +161,7 @@ class App extends React.Component {
             onRefresh={this.__onRefresh}
             onCancel={this.__onCancel}
             refreshing={refreshing}
+            sensitivity={Platform.OS === 'web' ? 1.2 : 5}
           >
             {({ animValue, refreshing }) => (
               <Animated.View

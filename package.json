@@ -1,6 +1,6 @@
 {
   "name": "@cawfree/react-native-elastic-footer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A React Native ScrollView footer with a little give.",
   "main": "index.js",
   "repository": "https://github.com/cawfree/react-native-elastic-footer",
