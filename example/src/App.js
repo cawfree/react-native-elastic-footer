@@ -146,7 +146,7 @@ class App extends React.Component {
           ref="scrollView"
           onScroll={onScroll}
           style={styles.scrollView}
-          scrollEventThrottle={0.1}
+          scrollEventThrottle={0.0001}
         >
           {items.map(({ key }) => (
             <Image
@@ -156,7 +156,7 @@ class App extends React.Component {
             />
           ))}
           <ElasticFooter
-            maxHeight={40}
+            maxHeight={100}
             onHandleMixins={this.__onHandleMixins}
             onRefresh={this.__onRefresh}
             onCancel={this.__onCancel}

@@ -13,6 +13,7 @@ class ElasticFooter extends React.Component {
       debounce: rate,
     } = nextProps;
     this.__onLayout = this.__onLayout.bind(this);
+    this.__onScroll = this.__onScroll.bind(this);
     this.state = {
       animValue: new Animated.Value(refreshing ? 1 : 0),
       cancelling: false,
@@ -28,8 +29,7 @@ class ElasticFooter extends React.Component {
       rate,
       { trailing: true },
     );
-  }
-  __onLayout(e) { /* android hack */ }
+  } 
   __onCancel(contentHeight) {
     const { onCancel } = this.props;
     this.setState(
@@ -97,64 +97,77 @@ class ElasticFooter extends React.Component {
       this.__depress();
     }
   }
-  componentDidMount() {
+  __onLayout(e) {
     const {
-      onHandleMixins,
+      x,
+      y,
+      width,
+      height,
+    } = e.nativeEvent.layout;
+  }
+  __onScroll(e) {
+    const {
       maxHeight,
       onRefresh,
       tension,
     } = this.props;
+
     // XXX: This is hacky. Come up with a smoother implementation function.
     const incr = (1 / maxHeight) * 1;
     const { footer } = this.refs;
-    onHandleMixins((e) => {
-      const {
-        cancelling: isCancelling,
-        refreshing: isRefreshing,
-      } = this.state;
-      const {
-        contentOffset: {
-          y,
-        },
-        contentSize: {
-          height: totalContentHeight,
-        },
-        layoutMeasurement: {
-          height: layoutHeight,
-        },
-      } = e.nativeEvent;
-      footer._component.measure(
-        (ox, oy, width, height, px, py) => {
-          const { animValue } = this.state;
-          const barHeight = animValue.__getValue() * maxHeight;
-          const contentHeight = totalContentHeight - barHeight;
-          const scrollLimit = contentHeight - layoutHeight;
-          const v = Math.min(
-            1,
-            Math.max(tension(((y - scrollLimit) + 1) * incr), tension(incr * 1.1)),
-          );
-          if (!isCancelling && !isRefreshing) {
-            if (y >= scrollLimit - 1) {
-              animValue.setValue(v);
-              if (v === 1) {
-                this.__onCancel.cancel();
-                this.__onRefresh(scrollLimit);
-              } else {
-                this.__onRefresh.cancel();
-                this.__onCancel(scrollLimit);
-              }
+
+    const {
+      cancelling: isCancelling,
+      refreshing: isRefreshing,
+    } = this.state;
+    const {
+      contentOffset: {
+        y,
+      },
+      contentSize: {
+        height: totalContentHeight,
+      },
+      layoutMeasurement: {
+        height: layoutHeight,
+      },
+    } = e.nativeEvent;
+    footer._component.measure(
+      (ox, oy, width, height, px, py) => {
+        const { animValue } = this.state;
+        const barHeight = animValue.__getValue() * maxHeight;
+        const contentHeight = totalContentHeight - barHeight;
+        const scrollLimit = contentHeight - layoutHeight;
+        const v = Math.min(
+          1,
+          Math.max(tension(((y - scrollLimit) + 1) * incr), tension(incr)),
+        );
+        if (!isCancelling && !isRefreshing) {
+          if (y >= scrollLimit - 1) {
+            animValue.setValue(v);
+            if (v === 1) {
+              this.__onCancel.cancel();
+              this.__onRefresh(scrollLimit);
             } else {
               this.__onRefresh.cancel();
-              this.__onCancel.cancel();
-              animValue.setValue(0);
+              this.__onCancel(scrollLimit);
             }
-          } else if (isRefreshing && v === 0) {
-            this.__onCancel(scrollLimit)
-            this.__onCancel.flush();
+          } else {
+            this.__onRefresh.cancel();
+            this.__onCancel.cancel();
+            animValue.setValue(0);
           }
-        },
-      );
-    });
+        } else if (isRefreshing && v === 0) {
+          this.__onCancel(scrollLimit)
+          this.__onCancel.flush();
+        }
+      },
+    );
+  }
+  componentDidMount() {
+    const {
+      onHandleMixins,
+    } = this.props;
+    onHandleMixins(this.__onScroll);
   }
   render() {
     const {
@@ -174,10 +187,12 @@ class ElasticFooter extends React.Component {
         onLayout={this.__onLayout}
         style={{
           height: Animated.multiply(
-            animValue,
+            Animated.multiply(
+              animValue,
+              1,
+            ),
             maxHeight,
           ),
-          backgroundColor: 'orange',
         }}
       >
         <Child
@@ -224,7 +239,7 @@ ElasticFooter.defaultProps = {
     />
   ),
   tension: (t) => {
-    return t;
+    return  t;
   },
 };
 
