@@ -1,5 +1,7 @@
 import React from 'react';
 import {
+  Animated,
+  Image,
   ScrollView,
   Platform,
   View,
@@ -15,6 +17,12 @@ class App extends React.Component {
     this.state = {
       onScroll: null,
       refreshing: false,
+      items: [
+        { key: 'https://images.pexels.com/photos/206959/pexels-photo-206959.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260'},
+        { key: 'https://images.pexels.com/photos/1002543/pexels-photo-1002543.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260' },
+        { key: 'https://images.pexels.com/photos/1824354/pexels-photo-1824354.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260' },
+        { key: 'https://images.pexels.com/photos/1260296/pexels-photo-1260296.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260' },
+      ],
     };
   }
   __onOnScroll(onScroll) {
@@ -26,8 +34,14 @@ class App extends React.Component {
   }
   __onRefresh() {
     return new Promise(resolve => this.setState({ refreshing: true }, resolve))
-      .then(() => new Promise(resolve => setTimeout(resolve, 3000)))
-      .then(() => new Promise(resolve => this.setState({ refreshing: false }, resolve)))
+      .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
+      .then(() => new Promise(resolve => this.setState({
+        items: [
+          { key: 'https://images.pexels.com/photos/37547/suit-business-man-business-man-37547.jpeg?auto=format%2Ccompress&cs=tinysrgb&h=750&w=1260' },
+          ...this.state.items,
+        ],
+        refreshing: false,
+      }, resolve)))
       .then(() => {
         const { scrollView } = this.refs;
         scrollView.scrollTo(
@@ -43,6 +57,7 @@ class App extends React.Component {
     const {
       onScroll,
       refreshing,
+      items,
     } = this.state;
     return (
       <View
@@ -62,225 +77,61 @@ class App extends React.Component {
           }}
           scrollEventThrottle={0.1}
         >
-          <View style={{ height: 100, width: 100, backgroundColor: 'green', borderWidth: 2}}/>
-          <View style={{ height: 100, width: 100, backgroundColor: 'green', borderWidth: 2}}/>
-          <View style={{ height: 100, width: 100, backgroundColor: 'green', borderWidth: 2}}/>
-          <View style={{ height: 100, width: 100, backgroundColor: 'green', borderWidth: 2}}/>
-          <View style={{ height: 100, width: 100, backgroundColor: 'green', borderWidth: 2}}/>
-          <View style={{ height: 100, width: 100, backgroundColor: 'green', borderWidth: 2}}/>
-          <View style={{ height: 100, width: 100, backgroundColor: 'green', borderWidth: 2}}/>
-          <View style={{ height: 100, width: 100, backgroundColor: 'green', borderWidth: 2}}/>
-          <View style={{ height: 100, width: 100, backgroundColor: 'green', borderWidth: 2}}/>
-          <View style={{ height: 100, width: 100, backgroundColor: 'green', borderWidth: 2}}/>
-          <View style={{ height: 100, width: 100, backgroundColor: 'green', borderWidth: 2}}/>
-          <View style={{ height: 100, width: 100, backgroundColor: 'green', borderWidth: 2}}/>
-          <View style={{ height: 100, width: 100, backgroundColor: 'green', borderWidth: 2}}/>
-          <View style={{ height: 100, width: 100, backgroundColor: 'green', borderWidth: 2}}/>
-          <View style={{ height: 100, width: 100, backgroundColor: 'green', borderWidth: 2}}/>
-          <View style={{ height: 100, width: 100, backgroundColor: 'green', borderWidth: 2}}/>
-          <View style={{ height: 100, width: 100, backgroundColor: 'green', borderWidth: 2}}/>
-          <View style={{ height: 100, width: 100, backgroundColor: 'green', borderWidth: 2}}/>
-          <View style={{ height: 100, width: 100, backgroundColor: 'green', borderWidth: 2}}/>
-          
+          {items.map(({ key }) => (
+            <Image
+              key={key}
+              style={{
+                width: 500,
+                height: 500,
+              }}
+              source={{ uri: key }}
+            />
+          ))}
           <TensionSheet
+            maxHeight={150}
             onOnScroll={this.__onOnScroll}
             onRefresh={this.__onRefresh}
             refreshing={refreshing}
-          />
-
+          >
+            {({ animValue, refreshing }) => (
+              <Animated.View
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  bottom: 0,
+                  right: 0,
+                  overflow: 'hidden',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: animValue
+                    .interpolate(
+                      {
+                        inputRange: [0, 1],
+                        outputRange: ['#005542', '#a1dd70'],
+                      },
+                    ),
+                }}
+              >
+                <Animated.Image
+                  style={{
+                    opacity: Animated.add(0.5, animValue),
+                    width: 70,
+                    height: 70,
+                    transform: [
+                      { scale: Animated.add(1, animValue) },
+                    ],
+                  }}
+                  source={{ uri: 'https://applehospitalityreit.com/wp-content/uploads/2018/10/apple-white.png' }}
+                />
+              </Animated.View>
+            )}
+          </TensionSheet>
         </ScrollView>
       </View>
     );
   }
 }
-
-//import React, { Component } from 'react';
-//import {
-//  ActivityIndicator,
-//  StyleSheet,
-//  View,
-//  Platform,
-//  ScrollView,
-//  Animated,
-//  Image,
-//} from 'react-native';
-//import ElasticFooter from './ElasticFooter';
-//
-//const styles = StyleSheet.create({
-//  container: {
-//    position: 'absolute',
-//    top: 0,
-//    left: 0,
-//    bottom: 0,
-//    right: 0,
-//    alignItems: 'center',
-//    justifyContent: 'center',
-//  },
-//  scrollView: {
-//    flexDirection: 'row',
-//  },
-//  image: {
-//    flex: 0,
-//    height: 200,
-//  },
-//});
-//
-//class App extends Component {
-//  constructor(nextProps) {
-//    super(nextProps);
-//    this.__handleOnScroll = this.__handleOnScroll.bind(this);
-//    this.__onRefresh = this.__onRefresh.bind(this);
-//    this.__onRefreshComplete = this.__onRefreshComplete.bind(this);
-//    this.state = {
-//      onScroll: null,
-//      refreshing: false,
-//      items: [
-//        { key: 'Bruised Banana', uri: 'https://images.pexels.com/photos/1166648/pexels-photo-1166648.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500' },
-//        { key: 'Lonely Apple', uri: 'https://images.pexels.com/photos/533343/pexels-photo-533343.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260' },
-//        { key: 'Depressed Grapefruit', uri: 'https://images.pexels.com/photos/2247211/pexels-photo-2247211.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500' },
-//        { key: 'Sweating Orange', uri: 'https://images.pexels.com/photos/67867/orange-falling-water-splash-67867.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260' },
-//        { key: 'Abused Peach', uri: 'https://images.pexels.com/photos/784145/pexels-photo-784145.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260' },
-//        { key: 'Ambiguous Melon', uri: 'https://images.pexels.com/photos/59970/background-food-fresh-fruit-59970.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260' },
-//      ],
-//    };
-//  }
-//  __handleOnScroll(onScroll) {
-//    this.setState(
-//      {
-//        onScroll,
-//      },
-//    );
-//  }
-//  __onRefresh() {
-//    return new Promise(resolve => this.setState({ refreshing: true }, resolve))
-//      .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
-//      .then(() => new Promise(resolve => this.setState({
-//        items: [
-//          { key: Math.random(), uri: 'https://images.pexels.com/photos/461337/pexels-photo-461337.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500' },
-//          ...this.state.items,
-//        ],
-//        refreshing: false,
-//      }, resolve)))
-//      .then(() => new Promise(resolve => this.setState({ refreshing: false }, resolve)))
-//      .then(this.__onRefreshComplete);
-//  }
-//  __onRefreshComplete() {
-//    const { scrollView } = this.refs;
-//    scrollView
-//      .scrollTo(
-//        {
-//          x: 0,
-//          y: 0,
-//          animated: true,
-//        },
-//      );
-//  }
-//  render() {
-//    const {
-//      onScroll,
-//      refreshing,
-//      items,
-//    } = this.state;
-//    return (
-//      <View
-//        style={styles.container}
-//      >
-//        <ScrollView
-//          ref="scrollView"
-//          pointerEvents={refreshing ? 'none' : 'auto'}
-//          onScroll={onScroll}
-//          overScrollMode="always"
-//          alwaysBounceVertical
-//          scrollEventThrottle={0.1}
-//          style={styles.scrollView}
-//        >
-//          {items.map(({ key, uri }) => (
-//            <Image
-//              key={key}
-//              style={styles.image}
-//              source={{ uri }}
-//            />
-//          ))}
-//          <View
-//            style={{
-//              width: 400,
-//              flexDirection: 'row',
-//            }}
-//          >
-//            <ElasticFooter
-//              maxHeight={300}
-//              handleOnScroll={this.__handleOnScroll}
-//              refreshing={refreshing}
-//              onRefresh={this.__onRefresh}
-//            >
-//              {({ animValue, refreshing }) => (
-//                <Animated.View
-//                  style={{
-//                    overflow: 'hidden',
-//                    flex: 1,
-//                    alignItems: 'center',
-//                    justifyContent: 'center',
-//                    backgroundColor: animValue
-//                      .interpolate(
-//                        {
-//                          inputRange: [0, 1],
-//                          outputRange: ['#f2f4d1', '#58b368'],
-//                        },
-//                      ),
-//                  }}
-//                >
-//                  <Animated.View
-//                    style={{
-//                      flex: 1,
-//                      flexDirection: 'row',
-//                      alignItems: 'center',
-//                    }}
-//                  >
-//                    <Animated.View
-//                      style={{
-//                        width: 75,
-//                        height: 75,
-//                        marginRight: 15,
-//                        paddingTop: Animated.multiply(
-//                          Animated.add(-1, animValue),
-//                          20,
-//                        ),
-//                      }}
-//                    >
-//                      <Animated.Image
-//                        style={{
-//                          width: 75,
-//                          height: 75,
-//                          marginRight: 15,
-//                        }}
-//                        source={{ uri: 'https://flaticons.net/gd/makefg.php?i=icons/Food/Fruit-Apple.png&r=255&g=255&b=255' }}
-//                      />
-//                      <Animated.View
-//                        style={{
-//                          position: 'absolute',
-//                          opacity: refreshing ? animValue : 0.0,
-//                          top: 0,
-//                          left: 0,
-//                          bottom: 0,
-//                          right: 0,
-//                          alignItems: 'center',
-//                          paddingTop: 38,
-//                        }}
-//                      >
-//                        <ActivityIndicator
-//                        />
-//                      </Animated.View>
-//                    </Animated.View>
-//                  </Animated.View>
-//                </Animated.View>
-//              )}
-//            </ElasticFooter>
-//          </View>
-//        </ScrollView>
-//      </View>
-//    );
-//  }
-//}
 
 let hotWrapper = () => () => App;
 if (Platform.OS === 'web') {
