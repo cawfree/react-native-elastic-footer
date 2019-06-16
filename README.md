@@ -2,7 +2,7 @@
 A React Native ScrollView footer with a little give.
 
 <p align="center">
-  <img src="./res/demo.gif" width="296" height="842">
+  <img src="./res/demo.gif" width="286" height="532">
 </p>
 
 Compatible with [React Native Web](https://github.com/necolas/react-native-web).
