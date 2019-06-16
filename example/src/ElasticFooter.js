@@ -102,7 +102,7 @@ class ElasticFooter extends React.Component {
       onHandleMixins,
       maxHeight,
       onRefresh,
-      sensitivity,
+      tension,
     } = this.props;
     // XXX: This is hacky. Come up with a smoother implementation function.
     const incr = (1 / maxHeight) * 1;
@@ -131,7 +131,7 @@ class ElasticFooter extends React.Component {
           const scrollLimit = contentHeight - layoutHeight;
           const v = Math.min(
             1,
-            (((y - scrollLimit) + 1) * incr) * sensitivity,
+            Math.max(tension(((y - scrollLimit) + 1) * incr), tension(incr * 1.1)),
           );
           if (!isCancelling && !isRefreshing) {
             if (y >= scrollLimit - 1) {
@@ -198,7 +198,7 @@ ElasticFooter.propTypes = {
   duration: PropTypes.number,
   debounce: PropTypes.number,
   children: PropTypes.func,
-  sensitivity: PropTypes.number,
+  tension: PropTypes.func,
 };
 
 ElasticFooter.defaultProps = {
@@ -223,7 +223,9 @@ ElasticFooter.defaultProps = {
       }}
     />
   ),
-  sensitivity: 1.2,
+  tension: (t) => {
+    return t;
+  },
 };
 
 Object.assign(

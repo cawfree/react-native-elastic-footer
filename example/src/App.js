@@ -156,12 +156,11 @@ class App extends React.Component {
             />
           ))}
           <ElasticFooter
-            maxHeight={120}
+            maxHeight={40}
             onHandleMixins={this.__onHandleMixins}
             onRefresh={this.__onRefresh}
             onCancel={this.__onCancel}
             refreshing={refreshing}
-            sensitivity={Platform.OS === 'web' ? 1.2 : 5}
           >
             {({ animValue, refreshing }) => (
               <Animated.View
