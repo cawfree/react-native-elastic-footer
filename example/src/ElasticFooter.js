@@ -14,10 +14,12 @@ class ElasticFooter extends React.Component {
     } = nextProps;
     this.__onLayout = this.__onLayout.bind(this);
     this.__onScroll = this.__onScroll.bind(this);
+    this.__manageScroll = this.__manageScroll.bind(this);
     this.state = {
       animValue: new Animated.Value(refreshing ? 1 : 0),
       cancelling: false,
       refreshing: false,
+      scrollEvent: null,
     };
     this.__onCancel = debounce(
       this.__onCancel.bind(this),
@@ -104,8 +106,20 @@ class ElasticFooter extends React.Component {
       width,
       height,
     } = e.nativeEvent.layout;
+    const {
+      scrollEvent,
+    } = this.state;
+    if (scrollEvent) {
+      if (scrollEvent === this.lastEvent) {
+        return;
+      }
+      this.__manageScroll(
+        scrollEvent,
+      );
+      this.lastEvent = scrollEvent;
+    }
   }
-  __onScroll(e) {
+  __manageScroll(e) {
     const {
       maxHeight,
       onRefresh,
@@ -162,6 +176,11 @@ class ElasticFooter extends React.Component {
         }
       },
     );
+
+  }
+  __onScroll(e) {
+    this.state.scrollEvent = { ...e };
+    this.__manageScroll(e);
   }
   componentDidMount() {
     const {
@@ -239,7 +258,7 @@ ElasticFooter.defaultProps = {
     />
   ),
   tension: (t) => {
-    return  t;
+    return t;
   },
 };
 
