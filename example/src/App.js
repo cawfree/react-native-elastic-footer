@@ -14,6 +14,7 @@ class App extends React.Component {
     super(nextProps);
     this.__onOnScroll = this.__onOnScroll.bind(this);
     this.__onRefresh = this.__onRefresh.bind(this);
+    this.__onCancel = this.__onCancel.bind(this);
     this.state = {
       onScroll: null,
       refreshing: false,
@@ -32,8 +33,17 @@ class App extends React.Component {
       },
     );
   }
+  __onCancel() {
+    this.setState(
+      {
+        refreshing: false,
+      },
+    );
+  }
   __onRefresh() {
+    // XXX: You can just leave the TensionSheet open...
     return new Promise(resolve => this.setState({ refreshing: true }, resolve))
+      // XXX: Or you can fetch data and programmatically close it once you're done.
       .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
       .then(() => new Promise(resolve => this.setState({
         items: [
@@ -91,6 +101,7 @@ class App extends React.Component {
             maxHeight={150}
             onOnScroll={this.__onOnScroll}
             onRefresh={this.__onRefresh}
+            onCancel={this.__onCancel}
             refreshing={refreshing}
           >
             {({ animValue, refreshing }) => (

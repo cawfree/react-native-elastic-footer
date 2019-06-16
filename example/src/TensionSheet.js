@@ -30,10 +30,13 @@ class TensionSheet extends React.Component {
   }
   __onLayout(e) { /* android hack */ }
   __onCancel() {
+    const { onCancel } = this.props;
     this.setState(
       {
+        refreshing: false,
         cancelling: true,
       },
+      onCancel,
     );
   }
   __onRefresh() {
@@ -107,30 +110,30 @@ class TensionSheet extends React.Component {
         cancelling: isCancelling,
         refreshing: isRefreshing,
       } = this.state;
-      if (!isCancelling && !isRefreshing) {
-        const {
-          contentOffset: {
-            y,
-          },
-          contentSize: {
-            height: totalContentHeight,
-          },
-          layoutMeasurement: {
-            height: layoutHeight,
-          },
-        } = e.nativeEvent;
-        footer._component.measure(
-          (ox, oy, width, height, px, py) => {
-            const { animValue } = this.state;
-            const barHeight = animValue.__getValue() * maxHeight;
-            const contentHeight = totalContentHeight - barHeight;
-            const scrollLimit = contentHeight - layoutHeight;
+      const {
+        contentOffset: {
+          y,
+        },
+        contentSize: {
+          height: totalContentHeight,
+        },
+        layoutMeasurement: {
+          height: layoutHeight,
+        },
+      } = e.nativeEvent;
+      footer._component.measure(
+        (ox, oy, width, height, px, py) => {
+          const { animValue } = this.state;
+          const barHeight = animValue.__getValue() * maxHeight;
+          const contentHeight = totalContentHeight - barHeight;
+          const scrollLimit = contentHeight - layoutHeight;
+          const v = Math.min(
+            1,
+            // TODO: need to scale coefficient properly
+            (((y - scrollLimit) + 1) * incr) * 1.2,
+          );
+          if (!isCancelling && !isRefreshing) {
             if (y >= scrollLimit - 1) {
-              const v = Math.min(
-                1,
-                // TODO: need to scale coefficient properly
-                (((y - scrollLimit) + 1) * incr) * 1.2,
-              );
               animValue.setValue(v);
               if (v === 1) {
                 this.__onCancel.cancel();
@@ -144,9 +147,12 @@ class TensionSheet extends React.Component {
               this.__onCancel.cancel();
               animValue.setValue(0);
             }
-          },
-        );
-      }
+          } else if (isRefreshing && v <= 0) {
+            this.__onCancel()
+            this.__onCancel.flush();
+          }
+        },
+      );
     });
   }
   render() {
@@ -188,6 +194,7 @@ TensionSheet.propTypes = {
   maxHeight: PropTypes.number,
   refreshing: PropTypes.bool,
   onRefresh: PropTypes.func,
+  onCancel: PropTypes.func,
   duration: PropTypes.number,
   debounce: PropTypes.number,
   children: PropTypes.func,
@@ -198,6 +205,7 @@ TensionSheet.defaultProps = {
   maxHeight: 100,
   refreshing: false,
   onRefresh: () => null,
+  onCancel: () => null,
   duration: 300,
   debounce: 120,
   children: ({ animValue, refreshing }) => (
