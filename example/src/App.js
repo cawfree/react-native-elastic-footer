@@ -11,8 +11,10 @@ class App extends React.Component {
   constructor(nextProps) {
     super(nextProps);
     this.__onOnScroll = this.__onOnScroll.bind(this);
+    this.__onRefresh = this.__onRefresh.bind(this);
     this.state = {
       onScroll: null,
+      refreshing: false,
     };
   }
   __onOnScroll(onScroll) {
@@ -22,9 +24,25 @@ class App extends React.Component {
       },
     );
   }
+  __onRefresh() {
+    return new Promise(resolve => this.setState({ refreshing: true }, resolve))
+      .then(() => new Promise(resolve => setTimeout(resolve, 3000)))
+      .then(() => new Promise(resolve => this.setState({ refreshing: false }, resolve)))
+      .then(() => {
+        const { scrollView } = this.refs;
+        scrollView.scrollTo(
+          {
+            x: 0,
+            y: 0,
+            animated: true,
+          },
+        );
+      });
+  }
   render() {
     const {
       onScroll,
+      refreshing,
     } = this.state;
     return (
       <View
@@ -37,6 +55,7 @@ class App extends React.Component {
         }}
       >
         <ScrollView
+          ref="scrollView"
           onScroll={onScroll}
           style={{
             flexDirection: 'row',
@@ -65,6 +84,8 @@ class App extends React.Component {
           
           <TensionSheet
             onOnScroll={this.__onOnScroll}
+            onRefresh={this.__onRefresh}
+            refreshing={refreshing}
           />
 
         </ScrollView>

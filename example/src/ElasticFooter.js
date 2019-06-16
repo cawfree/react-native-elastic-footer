@@ -150,7 +150,20 @@ class ElasticFooter extends React.Component {
           duration,
         },
       )
-        .start();
+        .start(
+          () => {
+            this.setTimeout(
+              () => {
+                this.setState(
+                  {
+                    refreshing: false,
+                  },
+                ),
+              },
+              rate,
+            );
+          },
+        );
     } else if (cancelling && !this.state.cancelling) {
       Animated.timing(
         animValue,
