@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Platform,
   Animated,
 } from 'react-native';
 import PropTypes from 'prop-types';
@@ -110,13 +111,16 @@ class ElasticFooter extends React.Component {
       scrollEvent,
     } = this.state;
     if (scrollEvent) {
-      if (scrollEvent === this.lastEvent) {
-        return;
+      const { processCount } = scrollEvent;
+      if (processCount < 1) {
+        Object.assign(
+          scrollEvent,
+          { processCount: processCount + 1 },
+        );
+        this.__manageScroll(
+          scrollEvent,
+        );
       }
-      this.__manageScroll(
-        scrollEvent,
-      );
-      this.lastEvent = scrollEvent;
     }
   }
   __manageScroll(e) {
@@ -179,7 +183,10 @@ class ElasticFooter extends React.Component {
 
   }
   __onScroll(e) {
-    this.state.scrollEvent = { ...e };
+    this.state.scrollEvent = {
+      ...e,
+      processCount: 0,
+    };
     this.__manageScroll(e);
   }
   componentDidMount() {
@@ -258,7 +265,7 @@ ElasticFooter.defaultProps = {
     />
   ),
   tension: (t) => {
-    return t;
+    return Platform.OS === 'web' ? 1.2 * t : t;
   },
 };
 
