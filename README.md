@@ -1,9 +1,9 @@
+# react-native-elastic-footer
+A React Native ScrollView footer with a little give.
+
 <p align="center">
   <img src="./res/demo.gif" width="296" height="842">
 </p>
-
-# react-native-elastic-footer
-A React Native ScrollView footer with a little give.
 
 Compatible with [React Native Web](https://github.com/necolas/react-native-web).
 
