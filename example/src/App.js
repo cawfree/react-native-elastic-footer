@@ -175,7 +175,7 @@ class App extends React.Component {
                   style={[
                     styles.icon,
                     {
-                      opacity: Animated.add(0.5, animValue),
+                      opacity: animValue,
                       transform: [
                         {
                           rotate: animRotate.interpolate(
